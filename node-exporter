@@ -1,0 +1,15 @@
+services:
+  node-exporter:
+    image: prom/node-exporter:v1.8.2
+    container_name: node-exporter
+    restart: unless-stopped
+
+    # Required for host-level metrics
+    network_mode: host
+    pid: host
+
+    command:
+      - '--path.rootfs=/host'
+
+    volumes:
+      - '/:/host:ro,rslave'
