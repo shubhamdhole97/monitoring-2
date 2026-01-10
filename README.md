@@ -15,14 +15,23 @@ It also supports scraping **additional servers** (Server-2, Server-3, …) that 
 ## Folder structure
 
 ```text
-monitoring/
-├── docker-compose.yml
-├── alertmanager/
-│   └── alertmanager.yml
-└── prometheus/
-    ├── prometheus.yml
-    └── rules/
-        └── alerts.yml
+└── monitoring
+    ├── README.md
+    ├── alertmanager
+    │   └── alertmanager.yml
+    ├── docker-compose.yml
+    ├── grafana
+    │   └── provisioning
+    │       ├── dashboards
+    │       │   └── dashboard.yml
+    │       └── datasources
+    │           └── datasource.yml
+    └── prometheus
+        ├── prometheus.yml
+        └── rules
+            └── alerts.yml
+
+
 ```
 
 ---
@@ -41,8 +50,16 @@ monitoring/
 ## Prerequisites
 
 On the monitoring server:
-- Docker Engine
+-  Install Docker Engine
 - Docker Compose plugin (`docker compose`)
+
+```bash
+curl -fsSL https://get.docker.com | bash
+sudo usermod -aG docker $USER
+newgrp docker
+docker images
+docker ps
+```
 
 ---
 
@@ -120,42 +137,10 @@ curl http://localhost:9100/metrics | head
 
 ### B) Allow port 9100 only from monitoring server (recommended)
 
-If using UFW on the target server:
 
-```bash
-sudo ufw allow from <MONITORING_SERVER_IP> to any port 9100 proto tcp
-sudo ufw deny 9100/tcp
-sudo ufw reload
-```
 
-(Or configure your cloud security group/firewall similarly.)
 
-### C) Add the new servers to Prometheus scrape targets
 
-Edit `monitoring/prometheus/prometheus.yml` and add your servers under the `node` job:
-
-```yaml
-  - job_name: "node"
-    static_configs:
-      - targets:
-          - "node-exporter:9100"
-        labels:
-          hostname: "monitoring-server"
-
-      - targets:
-          - "34.16.120.24:9100"
-        labels:
-          hostname: "web1"
-
-      - targets:
-          - "34.42.59.231:9100"
-        labels:
-          hostname: "web2"
-
-    relabel_configs:
-      - source_labels: [__address__]
-        target_label: ip
-```
 
 Reload Prometheus:
 
