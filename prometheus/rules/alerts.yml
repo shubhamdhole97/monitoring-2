@@ -1,0 +1,57 @@
+groups:
+  - name: node-alerts
+    rules:
+
+      # -------------------------
+      # HIGH CPU ALERT
+      # -------------------------
+      - alert: HighCPUUsage
+        expr: |
+          100 - (avg by (instance) (rate(node_cpu_seconds_total{mode="idle"}[2m])) * 100) > 80
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High CPU usage on {{ $labels.hostname }} ({{ $labels.ip }})"
+          description: |
+            Server: {{ $labels.hostname }}
+            IP: {{ $labels.ip }}
+            Instance: {{ $labels.instance }}
+            CPU Used: {{ printf "%.2f" $value }}%
+            Condition: CPU usage above 80% for 2 minutes
+
+      # -------------------------
+      # HIGH RAM ALERT
+      # -------------------------
+      - alert: HighMemoryUsage
+        expr: |
+          (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 30
+        for: 5s
+        labels:
+          severity: critical
+        annotations:
+          summary: "High RAM usage on {{ $labels.hostname }} ({{ $labels.ip }})"
+          description: |
+            Server: {{ $labels.hostname }}
+            IP: {{ $labels.ip }}
+            Instance: {{ $labels.instance }}
+            RAM Used: {{ printf "%.2f" $value }}%
+            Condition: RAM usage above 30%
+
+      # -------------------------
+      # DISK SPACE ALERT ( / )
+      # -------------------------
+      - alert: DiskSpaceLow
+        expr: |
+          (node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"}) * 100 < 20
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Low Disk Space on {{ $labels.hostname }} ({{ $labels.ip }})"
+          description: |
+            Server: {{ $labels.hostname }}
+            IP: {{ $labels.ip }}
+            Instance: {{ $labels.instance }}
+            Disk Free: {{ printf "%.2f" $value }}%
+            Condition: Disk space below 20% on /

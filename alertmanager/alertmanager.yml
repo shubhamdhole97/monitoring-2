@@ -1,0 +1,32 @@
+global:
+  resolve_timeout: 5m
+  smtp_smarthost: "smtp.gmail.com:587"
+  smtp_from: "shubhamdevops97@gmail.com"
+  smtp_auth_username: "shubhamdevops97@gmail.com"
+  smtp_auth_password: "gsmq yssv oxzr gcjc"
+  smtp_require_tls: true
+
+route:
+  receiver: "warning-email"
+  group_by: ["alertname", "instance"]
+  group_wait: 10s
+  group_interval: 30s
+  repeat_interval: 1h
+  routes:
+    - matchers:
+        - severity="critical"
+      receiver: "critical-email"
+    - matchers:
+        - severity="warning"
+      receiver: "warning-email"
+
+receivers:
+  - name: "critical-email"
+    email_configs:
+      - to: "shubhamdhole97@gmail.com"
+        send_resolved: true
+
+  - name: "warning-email"
+    email_configs:
+      - to: "shubhamdhole97@gmail.com"
+        send_resolved: true
